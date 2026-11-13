@@ -1,4 +1,4 @@
-/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v7 */
+/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v8 */
 (function (global) {
   var STAGES = [
     { id: "contract", name: "계약", anchor: "start", offset: -14 },
@@ -271,6 +271,8 @@
       }
       rec += " 다음 팝업의 매출 기준으로 이 숫자를 참고합니다.";
     }
+    if (good.length > 4) good.length = 4;
+    if (bad.length > 4) bad.length = 4;
     if (!good.length) good.push("평균보다 높은 지표가 없습니다.");
     if (!bad.length) bad.push("숫자로 확인된 문제점이 없습니다.");
     if (!warn.length) warn.push("숫자로 확인된 경고가 없습니다.");
@@ -330,14 +332,52 @@
     var nextText = next ? next.name + (next.due ? " · " + pretty(next.due) : "") : "남은 단계 없음";
     return '<aside class="chkfacts"><article class="card"><h3>기간</h3><p>' + esc(period) + '</p></article><article class="card"><h3>남은 일수</h3><p>' + (leftText ? esc(leftText) : "") + '</p></article><article class="card"><h3>다음 할 일</h3><p>' + esc(nextText) + "</p></article></aside>";
   }
-  function renderChecklist(p, today, editable) {
+  function popupOf(it) { return it && it.p ? it.p : it; }
+  function rangesOverlap(a, b) {
+    if (!validRange(a) || !validRange(b)) return false;
+    var ae = a.end && a.end >= a.start ? a.end : a.start;
+    var be = b.end && b.end >= b.start ? b.end : b.start;
+    return a.start <= be && b.start <= ae;
+  }
+  function peerCard(p, others, today) {
+    var list = (others || []).map(popupOf).filter(function (op) { return op && op.id !== p.id && rangesOverlap(p, op); });
+    var body = list.length ? "<ul class=\"insl\">" + list.map(function (op) {
+      var range = op.start ? pretty(op.start) + (op.end ? " ~ " + pretty(op.end) : "") : "";
+      return "<li><a href=\"#/popup?id=" + encodeURIComponent(op.id) + "\">" + esc(op.name) + "</a> " + esc(statusOf(op, today)) + (range ? " · " + esc(range) : "") + "</li>";
+    }).join("") + "</ul>" : "<p>기간이 겹치는 다른 팝업이 없습니다.</p>";
+    return "<article class=\"card peers\"><h3>같은 기간의 다른 팝업</h3>" + body + "</article>";
+  }
+  function salesCard(stat, p) {
+    var days = stat && stat.S && stat.S.days;
+    if (!days) return "";
+    var keys = Object.keys(days).filter(function (d) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+      if (p.start && d < p.start) return false;
+      if (p.end && p.end >= p.start && d > p.end) return false;
+      return true;
+    });
+    if (!keys.length) return "";
+    var sum = 0;
+    var qty = 0;
+    var sold = 0;
+    keys.forEach(function (k) {
+      var v = days[k];
+      var q = Array.isArray(v) ? Number(v[0]) : NaN;
+      var a = Array.isArray(v) ? Number(v[1]) : NaN;
+      if (finite(q)) qty += q;
+      if (finite(a)) sum += a;
+      if ((finite(a) && a !== 0) || (finite(q) && q !== 0)) sold++;
+    });
+    return "<article class=\"card peers\"><h3>기간 내 일자 매출</h3><p>집계된 날 " + keys.length + "일 · 매출이 있는 날 " + sold + "일</p><p>매출 합계 " + esc(fmt(sum)) + "원 · 수량 " + esc(fmt(qty)) + "개</p></article>";
+  }
+  function renderChecklist(p, today, editable, others, stat) {
     var rows = checklistModel(p, today);
     var done = rows.filter(function (r) { return r.done; }).length;
     var pct = rows.length ? Math.round(done / rows.length * 100) : 0;
     var overdue = rows.filter(function (r) { return r.overdue; }).length;
-    return '<div class="chkwrap"><section class="card prep" id="prep"><div class="prephd"><h3>팝업 준비 체크리스트</h3><div class="prepprog"><div class="prepbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div><b>' + done + "/" + rows.length + " · " + pct + '%</b></div></div><p class="muted">예정일은 시작일·종료일에서 계산합니다. 계약 14일 전, 굿즈 입고 7일 전, 홍보 3일 전, 오픈은 시작일, 철수는 종료일입니다.' + (overdue ? " 기한이 지난 미완료 " + overdue + "건." : "") + '</p><div class="prepgrid">' + rows.map(function (row) {
+    return '<div class="chkwrap"><div class="chkmain"><section class="card prep" id="prep"><div class="prephd"><h3>팝업 준비 체크리스트</h3><div class="prepprog"><div class="prepbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div><b>' + done + "/" + rows.length + " · " + pct + '%</b></div></div><p class="muted">예정일은 시작일·종료일에서 계산합니다. 계약 14일 전, 굿즈 입고 7일 전, 홍보 3일 전, 오픈은 시작일, 철수는 종료일입니다.' + (overdue ? " 기한이 지난 미완료 " + overdue + "건." : "") + '</p><div class="prepgrid">' + rows.map(function (row) {
       return '<label class="preprow' + (row.overdue ? " isover" : "") + (row.done ? " isdone" : "") + '"><span class="prepck"><input type="checkbox" data-stage="' + row.id + '"' + (row.done ? " checked" : "") + (editable ? "" : " disabled") + ' aria-label="' + esc(row.name) + '"> <span class="prepname">' + esc(row.name) + '</span></span><span class="prepmeta">' + esc(metaText(row)) + "</span></label>";
-    }).join("") + "</div></section>" + checklistFacts(p, today) + "</div>";
+    }).join("") + "</div></section>" + peerCard(p, others, today) + salesCard(stat, p) + "</div>" + checklistFacts(p, today) + "</div>";
   }
   function calendarFacts(items, today, counts) {
     var until = addDays(today, 14);
@@ -506,7 +546,7 @@
         input.disabled = true;
         S.setDoc(S.doc(S.db, "popups", item.p.id), { prep: prep, updatedAt: S.stamp() }, { merge: true }).then(function () {
           var box = document.querySelector(".chkwrap") || root;
-          box.outerHTML = renderChecklist(item.p, today, true);
+          box.outerHTML = renderChecklist(item.p, today, true, global.__smgcPop && global.__smgcPop.ms, item);
           bindChecklist(S, item, today);
         }).catch(function (e) {
           item.p.prep = snapshot;
@@ -537,7 +577,7 @@
       var host = document.querySelector("#app > .card");
       if (!item || !host || document.getElementById("prep")) return;
       var today = S.today();
-      host.insertAdjacentHTML("afterend", renderChecklist(item.p, today, !!S.canEdit()));
+      host.insertAdjacentHTML("afterend", renderChecklist(item.p, today, !!S.canEdit(), pack.ms, item));
       bindChecklist(S, item, today);
       return;
     }

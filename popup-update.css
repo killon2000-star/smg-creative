@@ -1,4 +1,4 @@
-/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v7 */
+/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v8 */
 main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:none;margin-left:0;margin-right:0}
 .calpage{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0;min-height:calc(100dvh - var(--smgc-head, 140px));height:auto}
 .caltop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -62,6 +62,9 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
   .caldetail{flex:0 0 32%;max-width:none}
 }
 .chkwrap{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0}
+.chkmain{display:flex;flex-direction:column;gap:8px;min-width:0}
+.prep{flex:0 0 auto;height:auto}
+.peers{margin:0;box-shadow:none}
 .chkfacts{display:grid;grid-template-columns:1fr;gap:8px}
 .prep{box-shadow:none;display:flex;flex-direction:column;min-height:0;margin:0}
 .prephd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -81,7 +84,9 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .preprow.isdone .prepname{text-decoration:line-through}
 @media (min-width:960px){
   .chkwrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.72fr);align-items:stretch}
-  .chkfacts{grid-template-rows:repeat(3,minmax(0,1fr))}
+  .chkmain{height:100%}
+  .peers{flex:1 1 auto}
+  .chkfacts{height:100%;grid-template-rows:repeat(3,minmax(0,1fr))}
 }
 .updcmp{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;min-width:0;margin-bottom:12px}
 .updcharts{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -104,7 +109,6 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
   .c-bad{grid-area:bad}
   .c-rec{grid-area:rec}
   .c-warn{grid-area:warn}
-  .c-good,.c-bad,.c-rec,.c-warn{max-height:210px;overflow:auto}
   .calfacts{overflow:hidden}
   .calfacts>.card{height:100%;min-height:0;overflow:auto}
 }
@@ -115,12 +119,13 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
   .cmpval{grid-column:2;grid-row:1}
 }
 @media (min-width:641px) and (max-width:1023px){
-  header nav{flex:1 0 100%;width:100%;display:grid!important;grid-template-columns:1fr 1fr;gap:6px 10px;overflow:visible}
-  nav .ncl{min-width:0;border-right:0;padding:0}
-  nav .ncl-i{flex-wrap:wrap}
-  nav .ncl-i a{flex:1 1 auto;justify-content:center;padding:0 8px}
+  header nav{flex:1 0 100%;width:100%;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:stretch;overflow:visible}
+  header nav .ncl{min-width:0;border:2px solid #111;border-radius:8px;padding:4px;display:flex;flex-direction:column;height:auto}
+  header nav .ncl-i{display:flex;flex-direction:column;gap:4px;flex:1}
+  header nav .ncl a{width:100%;flex:1 1 auto;justify-content:center;min-height:36px;padding:0 4px}
 }
-[data-theme=smg] .caldetail,[data-theme=smg] .prep,[data-theme=smg] .cmpchart,[data-theme=smg] .updcmp>.card,[data-theme=smg] .calitem,[data-theme=smg] .undated,[data-theme=smg] .calfacts>.card,[data-theme=smg] .chkfacts>.card,[data-theme=smg] .dhead{border:2px solid #0a0a0a}
+[data-theme=smg] .caldetail,[data-theme=smg] .prep,[data-theme=smg] .cmpchart,[data-theme=smg] .updcmp>.card,[data-theme=smg] .calitem,[data-theme=smg] .undated,[data-theme=smg] .calfacts>.card,[data-theme=smg] .chkfacts>.card,[data-theme=smg] .peers,[data-theme=smg] .dhead{border:2px solid #0a0a0a}
+@media (min-width:641px) and (max-width:1023px){[data-tone=black] header nav .ncl{border-color:#f3f4f6}}
 [data-tone=black] .calnav a{background:#14171c!important;color:#fff!important;border-color:#fff!important}
 [data-tone=black] .calnav a.on{background:#fff!important;color:#0a0a0a!important}
 [data-tone=black] .calleg .badge{border-color:#fff;color:#fff}
