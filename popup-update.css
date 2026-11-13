@@ -1,6 +1,6 @@
-/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v10 */
+/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v12 */
 main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:none;margin-left:0;margin-right:0}
-.calpage{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0;min-height:calc(100dvh - var(--smgc-head, 140px));height:auto}
+.calpage{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0;height:auto}
 .caltop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .caltitle{display:flex;align-items:baseline;gap:10px;min-width:0}
 .caltitle h2{margin:0;white-space:nowrap}
@@ -38,7 +38,7 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .st-soon{background:#fff;color:#111;border:1px solid #111}
 .st-done{background:#dcfce7;color:#14532d;border:1px solid #14532d}
 .st-none{background:#fee2e2;color:#7f1d1d;border:1px solid #7f1d1d}
-.caldetail{flex:1 0 auto;min-width:0;margin:0;display:flex;flex-direction:column;overflow:visible;box-shadow:none}
+.caldetail{flex:1 1 auto;min-width:0;margin:0;display:flex;flex-direction:column;overflow:visible;max-height:none;box-shadow:none}
 .caldetail h3{margin:0 0 8px}
 .caldl{display:flex;flex-direction:column;gap:8px}
 .calitem{display:flex;flex-direction:column;gap:8px;border-radius:8px;padding:8px;background:#fff;color:#0a0a0a;min-width:0}
@@ -47,8 +47,8 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .calkv b{min-width:0;font-weight:700;overflow-wrap:anywhere}
 .calkv a{color:#0a0a0a;font-weight:800}
 .calitem .calgo{width:100%;min-height:44px;border:2px solid #0a0a0a!important;background:#fff!important;color:#0a0a0a!important}
-.calfacts{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;flex:1 0 auto}
-.calfacts>.card,.chkfacts>.card{margin:0;box-shadow:none}
+.calfacts{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;flex:0 0 auto;align-items:stretch;height:auto}
+.calfacts>.card,.chkfacts>.card{margin:0;box-shadow:none;height:auto;overflow:visible}
 .factnums{display:flex;gap:8px}
 .factnums span{flex:1;border:2px solid #0a0a0a;border-radius:8px;padding:8px 4px;text-align:center;font-weight:800;background:#fff;color:#0a0a0a}
 .factnums b{display:block;font-size:1.35rem;line-height:1.2}
@@ -59,7 +59,8 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 @media (min-width:960px){
   .calbody{flex-direction:row;align-items:flex-start}
   .calgrid{flex:1;grid-template-rows:28px repeat(var(--weeks,5),minmax(48px,auto))}
-  .caldetail{flex:0 0 32%;max-width:none}
+  .caldetail{flex:0 0 32%;max-width:none;max-height:none;overflow:visible}
+  .caldl{overflow:visible}
 }
 .chkwrap{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0}
 .chkmain{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -112,8 +113,8 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
   .c-bad{grid-area:bad}
   .c-rec{grid-area:rec}
   .c-warn{grid-area:warn}
-  .calfacts{overflow:hidden}
-  .calfacts>.card{height:100%;min-height:0;overflow:auto}
+  .calfacts{overflow:visible;height:auto;align-items:stretch}
+  .calfacts>.card{height:auto;min-height:0;overflow:visible}
 }
 @media (max-width:640px){
   header nav .ncl-i{display:flex!important;flex-wrap:wrap;gap:4px}

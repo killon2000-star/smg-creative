@@ -1,0 +1,51 @@
+/* 입고 확인·실사·이동·마감. 폰·탭·PC 같은 버튼. v2 */
+main:has(.ops){width:100%;max-width:none}
+.ops{width:100%;min-width:0;display:flex;flex-direction:column;gap:10px}
+.ops h2,.ops h3{margin:0}
+.ops-steps,.sgrid,.ops-tools{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+.ops-steps button,.sgrid button,.ops-tools button,.ops-bar .btn{flex:1 1 10em;max-width:100%;min-height:var(--tap,44px);border:2px solid #111;background:#fff;color:#111;font-weight:800}
+.ops-steps button.on,.sgrid button.on,.ops-tools button.on{background:#111;color:#fff}
+.ops-steps button.done{background:#f3f4f6}
+.ops p,.ops-bar p{min-width:0;overflow-wrap:anywhere}
+.ops-drop{position:relative;min-height:96px;border:2px dashed #111;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;padding:12px}
+.ops-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;min-height:0}
+.ops-drop.over,.card.over{outline:3px solid #111}
+.ops-ta{width:100%;min-height:120px}
+.glist{display:flex;flex-direction:column;gap:8px;width:100%}
+.grow{border:2px solid #111;border-radius:10px;background:#fff;padding:10px 12px;min-width:0}
+.grow b,.grow .code,.gnums{overflow-wrap:anywhere}
+.grow .code{color:#374151;font-size:var(--fs-sm)}
+.gnums{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px;font-variant-numeric:tabular-nums;align-items:center}
+.gnums button,.gnums .sec{width:auto;flex:none}
+.gnums .bad{color:#b91c1c;font-weight:800}
+.ops-qty{width:6em;min-height:var(--tap,44px);text-align:right}
+.ops-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;bottom:0;background:var(--c-bg,#f5f5f5);padding:8px 0;border-top:2px solid #111}
+.ops-bar p{flex:1 1 220px;margin:0}
+.ops-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;align-items:start}
+.ops-chartwrap{min-width:0}
+.ops-chart{width:100%;height:auto;display:block;background:#fff;border:2px solid #111;border-radius:10px;overflow:visible}
+.ops-chart text{font-size:12px;fill:#111;font-family:var(--font)}
+.ops-chart rect{fill:#111}
+.mrep .block{border:2px solid #111;border-radius:10px;background:#fff;padding:8px 12px 10px;break-inside:avoid;page-break-inside:avoid}
+.mrep .block h3{margin:0 0 4px}
+.mrep .block p{margin:2px 0}
+.mrep .glist{gap:6px}
+.mrep .grow{padding:8px 10px}
+.ops-paste{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.lb{font-weight:700}
+@media (width<=800px){
+  .ops-split{grid-template-columns:1fr}
+}
+@media print{
+  body:has(.mrep) header,body:has(.mrep) .ops-tools,body:has(.mrep) .ops-bar,body:has(.mrep) button{display:none !important}
+  body:has(.mrep),body:has(.mrep) main{background:#fff !important;max-width:none !important;padding:0 !important}
+  .mrep{width:100%}
+  .mrep .block{break-inside:avoid;page-break-inside:avoid;margin:0 0 8mm}
+  @page{size:A4;margin:10mm}
+}
+[data-tone=black] .ops-steps button,[data-tone=black] .sgrid button,[data-tone=black] .ops-drop,[data-tone=black] .grow,[data-tone=black] .mrep .block,[data-tone=black] .ops-chart{background:#161a20;color:#f5f5f5;border-color:#f3f4f6}
+[data-tone=black] .ops-steps button.on,[data-tone=black] .sgrid button.on{background:#f5f5f5;color:#111}
+[data-tone=black] .grow .code,[data-tone=black] .ops-chart text{fill:#f5f5f5;color:#d1d5db}
+[data-tone=black] .ops-chart rect{fill:#f5f5f5}
+[data-tone=black] .gnums .bad{color:#fecaca}
+[data-tone=black] .ops-bar{background:#0b0d10;border-color:#f3f4f6}

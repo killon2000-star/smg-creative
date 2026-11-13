@@ -1,4 +1,4 @@
-/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v10 */
+/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. 월간 일정(공식 발표·내부 예정)은 같은 달력에 합칩니다. v12 */
 (function (global) {
   var STAGES = [
     { id: "contract", name: "계약", anchor: "start", offset: -14 },
@@ -442,9 +442,23 @@
     }).join("") + "</ul>" : "<p>기한이 지난 미완료 항목이 없습니다.</p>";
     return '<section class="calfacts"><article class="card"><h3>이번 달 팝업 요약</h3><div class="factnums"><span>진행 <b>' + counts.go + '</b></span><span>예정 <b>' + counts.soon + '</b></span><span>종료 <b>' + counts.done + '</b></span></div></article><article class="card"><h3>다가오는 일정</h3><p class="muted">' + esc(pretty(today)) + " ~ " + esc(pretty(until)) + "</p>" + evHtml + '</article><article class="card"><h3>기한 지난 체크</h3>' + lateHtml + "</article></section>";
   }
+  function schedLabel(e) {
+    return e && e.source === "plan" ? "내부 예정" : "공식 발표";
+  }
+  function schedGroupsOf(events) {
+    if (global.OPS && global.OPS.schedGroups) return global.OPS.schedGroups(events || []);
+    return (events || []).filter(function (e) { return e && e.start && e.end && !e.undated; }).map(function (e) { return { main: e, kids: [] }; });
+  }
+  function schedHits(groups, day) {
+    return groups.filter(function (g) {
+      var cover = function (e) { return e && e.start && e.end && e.start <= day && e.end >= day; };
+      return cover(g.main) || (g.kids || []).some(cover);
+    });
+  }
   function renderCalendar(opts) {
     var items = opts.items || [];
     var locs = opts.locs || [];
+    var events = opts.events || [];
     var today = opts.today;
     var params = opts.params || new URLSearchParams();
     var ym = params.get("m") || "";
@@ -454,6 +468,8 @@
     var sel = grid.cells.some(function (c) { return c.inMonth && c.iso === want; }) ? want : (grid.cells.some(function (c) { return c.inMonth && c.iso === today; }) ? today : grid.start);
     var undated = items.filter(function (it) { return !validRange(it.p); });
     var monthItems = items.filter(function (it) { return hitsMonth(it.p, grid); });
+    var groups = schedGroupsOf(events);
+    var undatedEv = events.filter(function (e) { return e && (e.undated || !e.start); });
     function count(st) {
       return monthItems.filter(function (it) { return statusOf(it.p, today) === st; }).length;
     }
@@ -467,21 +483,28 @@
     }
     var selected = dayPops(sel);
     var head = '<div class="caltop"><div class="caltitle"><h2>' + grid.y + "년 " + grid.m + '월</h2><a href="#/popups">팝업 목록</a></div><div class="calnav" role="group" aria-label="달 이동"><a class="btn sec" href="#/popcal?m=' + prev + '">이전 달</a><a class="btn sec' + (ym === cur ? " on" : "") + '" href="#/popcal?m=' + cur + '">이번달</a><a class="btn sec" href="#/popcal?m=' + next + '">다음 달</a></div></div>';
-    var leg = '<div class="calleg" aria-label="이 달 팝업 수"><span class="badge near">진행중 ' + count("진행중") + '</span><span class="badge pb">예정 ' + count("예정") + '</span><span class="badge ok">종료 ' + count("종료") + "</span></div>";
-    var und = undated.length ? '<section class="undated"><h3>날짜 미정 <span class="su">' + undated.length + '건</span></h3><div class="undated-row">' + undated.map(function (it) {
+    var leg = '<div class="calleg" aria-label="이 달 팝업 수"><span class="badge near">진행중 ' + count("진행중") + '</span><span class="badge pb">예정 ' + count("예정") + '</span><span class="badge ok">종료 ' + count("종료") + "</span>" + (events.length ? '<span class="badge">공식 발표</span><span class="badge pb">내부 예정</span>' : "") + "</div>";
+    var undChips = undated.map(function (it) {
       return '<a class="undchip" href="#/popup?id=' + encodeURIComponent(it.p.id) + '" title="' + esc(it.p.name) + '"><b>' + esc(it.p.name) + "</b><span>" + esc(kindOf(it.p)) + "</span></a>";
-    }).join("") + "</div></section>" : "";
+    }).concat(undatedEv.map(function (e) {
+      return '<span class="undchip" title="' + esc(e.title) + '"><b>' + esc(e.title) + "</b><span>" + esc(schedLabel(e)) + "</span></span>";
+    })).join("");
+    var und = undChips ? '<section class="undated"><h3>날짜 미정 <span class="su">' + (undated.length + undatedEv.length) + '건</span></h3><div class="undated-row">' + undChips + "</div></section>" : "";
     var dow = WD.map(function (d) { return '<div class="caldow">' + d + "</div>"; }).join("");
     var cells = grid.cells.map(function (c) {
       if (!c.inMonth) return '<div class="calcell isOut"><span class="calnum">' + c.day + "</span></div>";
       var pops = dayPops(c.iso);
+      var dayG = schedHits(groups, c.iso);
       var names = pops.map(function (it) {
         var st = statusOf(it.p, today);
         return '<span class="calchip ' + chipClass(st) + '">' + esc(it.p.name) + "</span>";
-      }).join("");
-      var more = pops.length > 1 ? '<span class="calmore">+' + (pops.length - 1) + "</span>" : "";
+      }).concat(dayG.map(function (g) {
+        return '<span class="calchip ' + (g.main.source === "plan" ? "st-soon" : "st-done") + '">' + esc(g.main.title) + "</span>";
+      })).join("");
+      var nAll = pops.length + dayG.length;
+      var more = nAll > 1 ? '<span class="calmore">+' + (nAll - 1) + "</span>" : "";
       var cls = "calcell" + (c.iso === sel ? " isSel" : "") + (c.iso === today ? " isToday" : "");
-      return '<a class="' + cls + '" href="#/popcal?m=' + ym + "&d=" + c.iso + '" aria-label="' + grid.m + "월 " + c.day + "일 팝업 " + pops.length + '개"><span class="calnum">' + c.day + '</span><span class="calnames">' + names + more + "</span></a>";
+      return '<a class="' + cls + '" href="#/popcal?m=' + ym + "&d=" + c.iso + '" aria-label="' + grid.m + "월 " + c.day + "일 팝업 " + pops.length + "개, 일정 " + dayG.length + '건"><span class="calnum">' + c.day + '</span><span class="calnames">' + names + more + "</span></a>";
     }).join("");
     var detailBody = selected.length ? selected.map(function (it) {
       var st = statusOf(it.p, today);
@@ -490,6 +513,16 @@
     }).join("") : '<p class="muted">이 날짜의 팝업이 없습니다.</p>' + (monthItems.length ? '<h3 class="calmoreh">이 달의 팝업</h3>' + monthItems.map(function (it) {
       return '<article class="calitem"><div class="calkv"><span>이름</span><b><a href="#/popup?id=' + encodeURIComponent(it.p.id) + '">' + esc(it.p.name) + '</a></b><span>상태</span><b>' + esc(statusOf(it.p, today)) + '</b><span>기간</span><b>' + esc(pretty(it.p.start) + " ~ " + pretty(it.p.end || it.p.start)) + '</b></div><a class="btn sec calgo" href="#/popup?id=' + encodeURIComponent(it.p.id) + '">팝업 상세</a></article>';
     }).join("") : '<p class="muted">이 달에 날짜가 있는 팝업이 없습니다.</p>');
+    var dayG = schedHits(groups, sel);
+    if (dayG.length) {
+      detailBody += dayG.map(function (g) {
+        var e = g.main;
+        var kids = (g.kids || []).filter(function (k) { return k.start <= sel && k.end >= sel; });
+        return '<article class="calitem"><div class="calkv"><span>행사</span><b>' + esc(e.title) + '</b><span>표기</span><b>' + esc(schedLabel(e)) + '</b><span>장소</span><b>' + esc(e.venueKey || e.venue || "") + '</b><span>기간</span><b>' + esc(pretty(e.start) + (e.end && e.end !== e.start ? " ~ " + pretty(e.end) : "")) + "</b></div>" + (e.note ? '<p class="muted">' + esc(e.note) + "</p>" : "") + kids.map(function (k) {
+          return '<p class="muted">세부 · ' + esc(k.title) + " · " + esc(schedLabel(k)) + " · " + esc(pretty(k.start)) + (k.end && k.end !== k.start ? " ~ " + esc(pretty(k.end)) : "") + "</p>";
+        }).join("") + "</article>";
+      }).join("");
+    }
     var facts = calendarFacts(items, today, { go: count("진행중"), soon: count("예정"), done: count("종료") });
     return '<section class="calpage" id="calpage" data-weeks="' + grid.weeks + '">' + head + leg + und + '<div class="calbody"><div class="calgrid" style="--weeks:' + grid.weeks + '" role="grid" aria-label="' + grid.y + "년 " + grid.m + '월 달력">' + dow + cells + '</div><aside class="caldetail card"><h3>' + esc(pretty(sel)) + '</h3><div class="caldl">' + detailBody + "</div></aside></div>" + facts + "</section>";
   }
@@ -528,34 +561,14 @@
   function fitCalendar() {
     var page = document.getElementById("calpage");
     if (!page) return;
-    var head = document.querySelector("header");
-    var main = document.querySelector("main");
-    var pad = 0;
-    if (main) {
-      var cs = getComputedStyle(main);
-      pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-    }
     page.style.height = "auto";
-    var headH = (head && head.offsetHeight) || 0;
-    document.documentElement.style.setProperty("--smgc-head", (headH + pad) + "px");
-    var grid = page.querySelector(".calgrid");
     var detail = page.querySelector(".caldetail");
     var facts = page.querySelector(".calfacts");
-    if (grid && detail) {
-      if (window.innerWidth >= 960) {
-        detail.style.maxHeight = grid.offsetHeight + "px";
-        detail.style.overflow = "auto";
-        if (facts) {
-          var top = grid.getBoundingClientRect().bottom + 8;
-          var room = window.innerHeight - top - 10;
-          facts.style.height = Math.max(150, room) + "px";
-        }
-      } else {
-        detail.style.maxHeight = "none";
-        detail.style.overflow = "visible";
-        if (facts) facts.style.height = "auto";
-      }
+    if (detail) {
+      detail.style.maxHeight = "none";
+      detail.style.overflow = "visible";
     }
+    if (facts) facts.style.height = "auto";
     fitNames(page);
   }
   function bindCalendar() {
@@ -653,7 +666,10 @@
       if (!S.canPopups()) return Promise.resolve('<div class="err">권한이 없습니다.</div>');
       return S.loadPopups().then(function (pack) {
         return S.locations(true).catch(function () { return []; }).then(function (locs) {
-          return renderCalendar({ items: pack.ms || [], locs: locs || [], params: params, today: pack.t || S.today() });
+          var extra = global.SMGC_SCHEDULE ? global.SMGC_SCHEDULE(S) : [];
+          return Promise.resolve(extra).then(function (events) {
+            return renderCalendar({ items: pack.ms || [], locs: locs || [], events: events || [], params: params, today: pack.t || S.today() });
+          });
         });
       }).catch(function () {
         return '<div class="err">팝업 일정을 불러오지 못했습니다.</div>';
