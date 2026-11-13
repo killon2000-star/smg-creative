@@ -1,0 +1,150 @@
+/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v4 */
+.calpage{display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0}
+.caltop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.caltitle{display:flex;align-items:baseline;gap:10px;min-width:0}
+.caltitle h2{margin:0;white-space:nowrap}
+.caltitle a{font-weight:700;white-space:nowrap}
+.calnav{display:flex;gap:6px;flex:1 1 280px;min-width:0}
+.calnav a{flex:1;min-height:44px;border:2px solid #0a0a0a!important;background:#fff!important;color:#0a0a0a!important;padding:0 8px}
+.calnav a.on{background:#0a0a0a!important;color:#fff!important}
+.calleg{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.calleg .badge{border:1px solid #0a0a0a;color:#0a0a0a;font-weight:800}
+.undated{background:#fff;border:2px solid #0a0a0a;border-radius:10px;padding:8px 10px;min-width:0;max-height:22%;overflow:auto}
+.undated h3{margin:0 0 6px}
+.undated-row{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.undchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-height:36px;padding:4px 8px;border:2px solid #0a0a0a;border-radius:8px;background:#fff;color:#0a0a0a;text-decoration:none;font-weight:700}
+.undchip b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.undchip span{flex:none;font-size:var(--fs-xs);font-weight:800}
+.calbody{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;min-width:0}
+.calgrid{flex:1.25;min-height:0;min-width:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:28px repeat(var(--weeks,5),minmax(0,1fr));border-top:2px solid #0a0a0a;border-left:2px solid #0a0a0a;background:#fff}
+.caldow,.calcell{min-width:0;border-right:1px solid #0a0a0a;border-bottom:1px solid #0a0a0a}
+.caldow{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:#f3f4f6;color:#0a0a0a}
+.calcell{display:flex;flex-direction:column;gap:2px;padding:2px 3px;background:#fff;color:#0a0a0a;text-decoration:none;overflow:hidden;position:relative}
+.calcell.isOut{background:#e5e7eb;color:#1f2937}
+.calnum{font-size:12px;font-weight:800;line-height:1.1;flex:none}
+.calcell.isToday .calnum{color:#9e1a40}
+.calcell.isSel{box-shadow:inset 0 0 0 3px #c42550;z-index:1}
+.calnames{display:flex;gap:2px;min-width:0;overflow:hidden;align-items:center}
+.calnames .calchip:not(:first-child),.calnames .calmore{display:none}
+.calnames .calchip:first-child{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.calnames.isFit .calchip{display:block;flex:0 0 auto;max-width:none;overflow:visible;text-overflow:clip}
+.calnames.isFit .calmore{display:block;flex:none}
+.calnames.isFit .calchip.ellip{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.calchip,.calmore{font-size:12px;line-height:1.25;font-weight:800;border-radius:4px;padding:0 3px;white-space:nowrap}
+.calmore{background:#0a0a0a;color:#fff}
+.st-go{background:#fef3c7;color:#111;border:1px solid #111}
+.st-soon{background:#fff;color:#111;border:1px solid #111}
+.st-done{background:#dcfce7;color:#14532d;border:1px solid #14532d}
+.st-none{background:#fee2e2;color:#7f1d1d;border:1px solid #7f1d1d}
+.caldetail{flex:1;min-height:0;min-width:0;margin:0;display:flex;flex-direction:column;overflow:auto;border:2px solid #0a0a0a;box-shadow:none}
+.caldetail h3{margin:0 0 8px}
+.caldl{display:flex;flex-direction:column;gap:8px;min-height:0}
+.calitem{flex:1 0 auto;display:flex;flex-direction:column;justify-content:space-between;gap:8px;border:2px solid #0a0a0a;border-radius:8px;padding:8px;background:#fff;color:#0a0a0a;min-width:0}
+.calkv{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:4px 8px;align-items:start}
+.calkv span{color:#111;font-weight:800;font-size:var(--fs-sm)}
+.calkv b{min-width:0;font-weight:700;overflow-wrap:anywhere}
+.calitem .calgo{width:100%;min-height:44px;border:2px solid #0a0a0a!important;background:#fff!important;color:#0a0a0a!important}
+.calkv a{color:#0a0a0a;font-weight:800}
+.calchip[hidden],.calmore[hidden]{display:none!important}
+.calmoreh{margin:4px 0}
+@media (max-width:959px){
+  body:has(#calpage){overflow:hidden}
+  .calpage{gap:6px}
+  .caltop{gap:4px}
+  .calnav a{min-height:40px}
+  .undated{max-height:46px;padding:4px 8px;display:flex;align-items:center;gap:6px}
+  .undated h3{margin:0;flex:none}
+  .undated-row{flex-wrap:nowrap;overflow:auto}
+  .calbody{flex:1;min-height:0;gap:6px}
+  .calgrid{flex:1;min-height:96px;overflow:auto;grid-template-rows:26px repeat(var(--weeks,5),minmax(42px,1fr))}
+  .caldetail{flex:1.35;min-height:0;overflow:auto;padding:8px}
+  .caldetail h3{margin:0 0 6px}
+  .calitem .calgo{display:none}
+  .calitem{padding:6px;gap:4px}
+  .calkv{gap:2px 8px}
+}
+@media (min-width:960px){
+  .calbody{flex-direction:row;align-items:stretch}
+  .calgrid{flex:1.45}
+  .caldetail{flex:0 0 34%;max-width:440px}
+}
+.prep{border:2px solid #0a0a0a;box-shadow:none;display:flex;flex-direction:column;min-height:0}
+.prepgrid{flex:1}
+.prephd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.prephd h3{margin:0}
+.prepprog{display:flex;align-items:center;gap:8px;flex:1 1 180px;min-width:0}
+.prepbar{flex:1;height:12px;background:#111;border-radius:99px;overflow:hidden;min-width:48px}
+.prepbar i{display:block;height:100%;background:#c42550}
+.prepprog b{white-space:nowrap}
+.prepgrid{display:flex;flex-direction:column;margin-top:4px}
+.preprow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;flex:1;min-height:44px;border-top:1px solid #111;padding:4px 0;color:#0a0a0a}
+.prepck{display:flex;align-items:center;gap:8px;min-width:0;font-weight:800}
+.prepck input{width:22px;height:22px;flex:none}
+.prepname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prepmeta{text-align:right;font-weight:800;white-space:nowrap}
+.preprow.isover{background:#fff4e5}
+.preprow.isover .prepmeta{color:#7c2d12}
+.preprow.isdone .prepname{text-decoration:line-through}
+.updcmp{display:flex;flex-direction:column;gap:8px;min-width:0;margin-bottom:12px}
+.updcharts{display:flex;flex-direction:column;gap:8px;min-width:0}
+.updgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:stretch}
+.updgrid>.card{margin:0;min-width:0;border:2px solid #0a0a0a;box-shadow:none;display:flex;flex-direction:column}
+.updgrid .insl{margin:0;padding-left:1.1em}
+.updgrid li,.updgrid p,.warnb{word-break:keep-all;overflow-wrap:break-word}
+.updgrid .warnb{margin-top:6px}
+.updgrid .warnb:first-of-type{margin-top:0}
+.cmpchart{margin:0;border:2px solid #0a0a0a;box-shadow:none}
+.cmpbars{display:flex;flex-direction:column;gap:6px}
+.cmpbar{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(36px,1.5fr) auto;gap:6px;align-items:center;min-width:0}
+.cmpname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
+.cmptrack{display:block;height:14px;background:#111;border-radius:7px;overflow:hidden;min-width:0}
+.cmptrack i{display:block;height:100%;background:#c42550}
+.cmpval{font-weight:800;white-space:nowrap;text-align:right}
+@media (min-width:800px) and (max-width:1279px){
+  .updgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .updgrid>:last-child:nth-child(odd){grid-column:1 / -1}
+}
+@media (min-width:960px){
+  .updcmp{display:grid;grid-template-columns:minmax(260px,.82fr) minmax(0,1.35fr);align-items:start}
+  .updcharts{grid-column:1;grid-row:1}
+  .updgrid{grid-column:2;grid-row:1;grid-template-columns:1fr 1fr}
+  .updgrid>:last-child:nth-child(odd){grid-column:1 / -1}
+}
+@media (min-width:1280px){
+  .updgrid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .updgrid>*{grid-column:span 2}
+  .updgrid>:nth-child(4){grid-column:span 3}
+  .updgrid>:last-child:nth-child(odd){grid-column:span 3}
+}
+@media (max-width:480px){
+  .cmpbar{grid-template-columns:minmax(0,1fr) auto}
+  .cmptrack{grid-column:1 / -1;grid-row:2}
+  .cmpname{grid-column:1;grid-row:1}
+  .cmpval{grid-column:2;grid-row:1}
+}
+[data-tone=black] .calitem .calgo{background:#14171c!important;color:#fff!important;border-color:#fff!important}
+[data-tone=black] .calnav a{background:#14171c!important;color:#fff!important;border-color:#fff!important}
+[data-tone=black] .calnav a.on{background:#fff!important;color:#0a0a0a!important}
+[data-tone=black] .calleg .badge{border-color:#fff;color:#fff}
+[data-tone=black] .badge.near{background:#3f2e05;color:#fde68a}
+[data-tone=black] .badge.pb{background:#1f2937;color:#fff}
+[data-tone=black] .badge.ok{background:#052e16;color:#bbf7d0}
+[data-tone=black] .undated,[data-tone=black] .calgrid,[data-tone=black] .calcell,[data-tone=black] .calitem,[data-tone=black] .undchip{background:#161a20;color:#f5f5f5;border-color:#e5e7eb}
+[data-tone=black] .caldow{background:#0b0d10;color:#fff;border-color:#e5e7eb}
+[data-tone=black] .calcell,[data-tone=black] .caldow{border-color:#e5e7eb}
+[data-tone=black] .calcell.isOut{background:#0b0d10;color:#d1d5db}
+[data-tone=black] .calcell.isToday .calnum{color:#ffb3c7}
+[data-tone=black] .st-go{background:#3f2e05;color:#fde68a;border-color:#fde68a}
+[data-tone=black] .st-soon{background:#1f2329;color:#fff;border-color:#fff}
+[data-tone=black] .st-done{background:#052e16;color:#bbf7d0;border-color:#bbf7d0}
+[data-tone=black] .st-none{background:#3f1212;color:#fecaca;border-color:#fecaca}
+[data-tone=black] .calmore{background:#fff;color:#0a0a0a}
+[data-tone=black] .caldetail,[data-tone=black] .prep,[data-tone=black] .updgrid>.card,[data-tone=black] .cmpchart{border-color:#e5e7eb}
+[data-tone=black] .calkv span,[data-tone=black] .prepmeta,[data-tone=black] .prepname,[data-tone=black] .cmpname,[data-tone=black] .cmpval{color:#f5f5f5}
+[data-tone=black] .preprow{border-top-color:#e5e7eb;color:#f5f5f5}
+[data-tone=black] .preprow.isover{background:#2a1a05}
+[data-tone=black] .preprow.isover .prepmeta{color:#fde68a}
+[data-tone=black] .prepbar{background:#fff}
+[data-tone=black] .cmptrack{background:#fff}
+[data-tone=black] .undchip span{color:#fff}
+body:has(#calpage){overflow:hidden}

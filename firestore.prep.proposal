@@ -1,0 +1,14 @@
+# 제안만 합니다. 이 파일은 배포·적용 대상이 아닙니다.
+# 팝업 준비 체크리스트는 새 컬렉션을 만들지 않습니다.
+# 기존 popups/{popupId} 문서의 prep 맵과 updatedAt 만 setDoc merge 로 갱신합니다.
+#
+# 앱이 이미 같은 popups 문서를 저장하고 있고, 규칙이 문서 단위 쓰기라면
+# 규칙 변경은 필요 없습니다.
+#
+# 규칙이 필드 허용 목록이면 popups 쓰기에 prep, updatedAt 만 추가합니다.
+# 예시 (기존 isStaff() 조건은 현재 규칙에 맞게 바꾸세요):
+#
+# match /popups/{id} {
+#   allow update: if isStaff()
+#     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['prep', 'updatedAt']);
+# }
