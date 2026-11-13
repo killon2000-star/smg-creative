@@ -52,6 +52,9 @@ const html = U.renderCalendar({
   params: new URLSearchParams("m=2026-11&d=2026-11-13")
 });
 assert.ok(html.includes("날짜 미정"));
+assert.ok(html.includes("이번 달 팝업 요약"));
+assert.ok(html.includes("기한 지난 체크"));
+assert.ok(html.includes("29"));
 assert.ok(html.includes("이전 달") && html.includes("이번달") && html.includes("다음 달"));
 assert.ok(html.includes("+2") || html.includes("+3") || html.includes("calmore"));
 assert.ok(!html.includes("undefined"));

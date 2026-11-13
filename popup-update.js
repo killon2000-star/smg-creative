@@ -1,4 +1,4 @@
-/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v4 */
+/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v7 */
 (function (global) {
   var STAGES = [
     { id: "contract", name: "계약", anchor: "start", offset: -14 },
@@ -187,10 +187,24 @@
     var warn = [];
     var usable = items.filter(function (it) { return statusOf(it.p, today) !== "예정" && statusOf(it.p, today) !== "날짜 미정"; });
     var planned = items.filter(function (it) { return statusOf(it.p, today) === "예정" || statusOf(it.p, today) === "날짜 미정"; });
-    summary.push("선택한 팝업 " + items.length + "개를 저장된 집계 숫자로 비교합니다.");
-    if (planned.length) {
-      summary.push("시작 전·날짜 미정 " + planned.length + "개(" + planned.map(function (it) { return it.p.name; }).join(", ") + ")는 매출 비교에서 제외했습니다.");
+    summary.push("선택 " + items.length + "개를 저장된 집계 숫자로 비교합니다.");
+    if (planned.length) summary.push("시작 전·날짜 미정 " + planned.length + "개는 매출 비교에서 제외했습니다.");
+    function rankLineText(key, label, unit) {
+      var rows = usable.map(function (it) {
+        var value = metricValue(it, key);
+        return value == null ? null : { item: it, value: value };
+      }).filter(Boolean);
+      var ranked = rankLine(rows);
+      if (!ranked) return "";
+      var names = ranked.tops.map(function (r) { return r.item.p.name; }).join(", ");
+      return label + " 1위 " + names + " " + formatMetric(key, ranked.max, unit) + " (평균 " + formatMetric(key, ranked.avg, unit) + ")";
     }
+    ["perDay", "a", "st", "rate"].forEach(function (key) {
+      if (summary.length >= 4) return;
+      var spec = METRICS.filter(function (s) { return s[0] === key; })[0];
+      var line = spec ? rankLineText(spec[0], spec[1], spec[2]) : "";
+      if (line) summary.push(line);
+    });
     METRICS.forEach(function (spec) {
       var key = spec[0];
       var label = spec[1];
@@ -204,7 +218,6 @@
       var names = ranked.tops.map(function (r) { return r.item.p.name; }).join(", ");
       var shown = formatMetric(key, ranked.max, unit);
       var avgShown = formatMetric(key, ranked.avg, unit);
-      summary.push(label + " 1위 " + names + " " + shown + " (비교 " + ranked.n + "개 평균 " + avgShown + ")");
       if (ranked.above) {
         var pct = (ranked.max - ranked.avg) / Math.abs(ranked.avg) * 100;
         good.push(label + " · " + names + " " + shown + " · 평균 " + avgShown + " 대비 " + (pct >= 0 ? "+" : "") + one(pct) + "%");
@@ -282,15 +295,15 @@
   function renderCompare(items, today, marginLine) {
     var m = compareModel(items, today, marginLine);
     var cards = [
-      ["요약", listHtml(m.summary)],
-      ["잘한 점", listHtml(m.good)],
-      ["문제점", listHtml(m.bad)],
-      ["다음 팝업 추천", "<p>" + esc(m.rec) + "</p>"],
-      ["경고", m.warn.length === 1 && m.warn[0].indexOf("없습니다") >= 0 ? "<p>" + esc(m.warn[0]) + "</p>" : m.warn.map(function (w) { return '<div class="warnb">' + esc(w) + "</div>"; }).join("")]
+      ["sum", "요약", listHtml(m.summary)],
+      ["good", "잘한 점", listHtml(m.good)],
+      ["bad", "문제점", listHtml(m.bad)],
+      ["rec", "다음 팝업 추천", "<p>" + esc(m.rec) + "</p>"],
+      ["warn", "경고", m.warn.length === 1 && m.warn[0].indexOf("없습니다") >= 0 ? "<p>" + esc(m.warn[0]) + "</p>" : m.warn.map(function (w) { return '<div class="warnb">' + esc(w) + "</div>"; }).join("")]
     ];
-    return '<section class="updcmp" id="updcmp"><div class="updcharts">' + barsHtml(items, "perDay", "일평균 매출", "원") + barsHtml(items, "a", "총매출", "원") + '</div><div class="updgrid">' + cards.map(function (c) {
-      return '<article class="card"><h3>' + c[0] + "</h3>" + c[1] + "</article>";
-    }).join("") + "</div></section>";
+    return '<section class="updcmp" id="updcmp"><div class="updcharts">' + barsHtml(items, "perDay", "일평균 매출", "원") + barsHtml(items, "a", "총매출", "원") + "</div>" + cards.map(function (c) {
+      return '<article class="card c-' + c[0] + '"><h3>' + c[1] + "</h3>" + c[2] + "</article>";
+    }).join("") + "</section>";
   }
   function metaText(row) {
     if (row.done) return "완료" + (row.at ? " " + pretty(row.at) : "");
@@ -298,14 +311,56 @@
     if (row.overdue) return "예정일 지남 · " + pretty(row.due);
     return "예정 " + pretty(row.due);
   }
+  function dayDiff(from, to) {
+    if (!from || !to || !/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return null;
+    return Math.round((utc(to) - utc(from)) / 86400000);
+  }
+  function nextTask(p, today) {
+    var rows = checklistModel(p, today);
+    for (var i = 0; i < rows.length; i++) if (!rows[i].done) return rows[i];
+    return null;
+  }
+  function checklistFacts(p, today) {
+    var start = p.start && /^\d{4}-\d{2}-\d{2}$/.test(p.start) ? p.start : "";
+    var end = p.end && /^\d{4}-\d{2}-\d{2}$/.test(p.end) && (!start || p.end >= start) ? p.end : "";
+    var left = end ? dayDiff(today, end) : null;
+    var next = nextTask(p, today);
+    var period = start && end ? pretty(start) + " ~ " + pretty(end) : start ? pretty(start) + " ~ 종료일 없음" : "시작일 없음";
+    var leftText = left == null ? "" : left > 0 ? left + "일" : left === 0 ? "오늘 종료" : "종료 후 " + (-left) + "일";
+    var nextText = next ? next.name + (next.due ? " · " + pretty(next.due) : "") : "남은 단계 없음";
+    return '<aside class="chkfacts"><article class="card"><h3>기간</h3><p>' + esc(period) + '</p></article><article class="card"><h3>남은 일수</h3><p>' + (leftText ? esc(leftText) : "") + '</p></article><article class="card"><h3>다음 할 일</h3><p>' + esc(nextText) + "</p></article></aside>";
+  }
   function renderChecklist(p, today, editable) {
     var rows = checklistModel(p, today);
     var done = rows.filter(function (r) { return r.done; }).length;
     var pct = rows.length ? Math.round(done / rows.length * 100) : 0;
     var overdue = rows.filter(function (r) { return r.overdue; }).length;
-    return '<section class="card prep" id="prep"><div class="prephd"><h3>팝업 준비 체크리스트</h3><div class="prepprog"><div class="prepbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div><b>' + done + "/" + rows.length + " · " + pct + '%</b></div></div><p class="muted">예정일은 시작일·종료일에서 계산합니다. 계약 14일 전, 굿즈 입고 7일 전, 홍보 3일 전, 오픈은 시작일, 철수는 종료일입니다.' + (overdue ? " 기한이 지난 미완료 " + overdue + "건." : "") + '</p><div class="prepgrid">' + rows.map(function (row) {
+    return '<div class="chkwrap"><section class="card prep" id="prep"><div class="prephd"><h3>팝업 준비 체크리스트</h3><div class="prepprog"><div class="prepbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div><b>' + done + "/" + rows.length + " · " + pct + '%</b></div></div><p class="muted">예정일은 시작일·종료일에서 계산합니다. 계약 14일 전, 굿즈 입고 7일 전, 홍보 3일 전, 오픈은 시작일, 철수는 종료일입니다.' + (overdue ? " 기한이 지난 미완료 " + overdue + "건." : "") + '</p><div class="prepgrid">' + rows.map(function (row) {
       return '<label class="preprow' + (row.overdue ? " isover" : "") + (row.done ? " isdone" : "") + '"><span class="prepck"><input type="checkbox" data-stage="' + row.id + '"' + (row.done ? " checked" : "") + (editable ? "" : " disabled") + ' aria-label="' + esc(row.name) + '"> <span class="prepname">' + esc(row.name) + '</span></span><span class="prepmeta">' + esc(metaText(row)) + "</span></label>";
-    }).join("") + "</div></section>";
+    }).join("") + "</div></section>" + checklistFacts(p, today) + "</div>";
+  }
+  function calendarFacts(items, today, counts) {
+    var until = addDays(today, 14);
+    var events = [];
+    var late = [];
+    items.forEach(function (it) {
+      var p = it.p;
+      if (!p) return;
+      if (validRange(p) && p.start >= today && p.start <= until) events.push({ id: p.id, name: p.name, kind: "오픈", date: p.start });
+      if (p.end && /^\d{4}-\d{2}-\d{2}$/.test(p.end) && (!p.start || p.end >= p.start) && p.end >= today && p.end <= until) events.push({ id: p.id, name: p.name, kind: "철수", date: p.end });
+      checklistModel(p, today).forEach(function (row) {
+        if (row.overdue) late.push({ id: p.id, name: p.name, stage: row.name, due: row.due });
+      });
+    });
+    events.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.kind < b.kind ? -1 : 1; });
+    late.sort(function (a, b) { return a.due < b.due ? -1 : a.due > b.due ? 1 : 0; });
+    var evHtml = events.length ? "<ul class=\"insl\">" + events.map(function (e) {
+      return '<li><a href="#/popup?id=' + encodeURIComponent(e.id) + '">' + esc(e.name) + "</a> " + esc(e.kind) + " " + esc(pretty(e.date)) + "</li>";
+    }).join("") + "</ul>" : "<p>다음 14일 안의 오픈·철수가 없습니다.</p>";
+    var lateHtml = late.length ? "<ul class=\"insl\">" + late.map(function (e) {
+      return '<li><a href="#/popup?id=' + encodeURIComponent(e.id) + '">' + esc(e.name) + "</a> " + esc(e.stage) + " " + esc(pretty(e.due)) + "</li>";
+    }).join("") + "</ul>" : "<p>기한이 지난 미완료 항목이 없습니다.</p>";
+    return '<section class="calfacts"><article class="card"><h3>이번 달 팝업 요약</h3><div class="factnums"><span>진행 <b>' + counts.go + '</b></span><span>예정 <b>' + counts.soon + '</b></span><span>종료 <b>' + counts.done + '</b></span></div></article><article class="card"><h3>다가오는 일정</h3><p class="muted">' + esc(pretty(today)) + " ~ " + esc(pretty(until)) + "</p>" + evHtml + '</article><article class="card"><h3>기한 지난 체크</h3>' + lateHtml + "</article></section>";
   }
   function renderCalendar(opts) {
     var items = opts.items || [];
@@ -355,7 +410,8 @@
     }).join("") : '<p class="muted">이 날짜의 팝업이 없습니다.</p>' + (monthItems.length ? '<h3 class="calmoreh">이 달의 팝업</h3>' + monthItems.map(function (it) {
       return '<article class="calitem"><div class="calkv"><span>이름</span><b><a href="#/popup?id=' + encodeURIComponent(it.p.id) + '">' + esc(it.p.name) + '</a></b><span>상태</span><b>' + esc(statusOf(it.p, today)) + '</b><span>기간</span><b>' + esc(pretty(it.p.start) + " ~ " + pretty(it.p.end || it.p.start)) + '</b></div><a class="btn sec calgo" href="#/popup?id=' + encodeURIComponent(it.p.id) + '">팝업 상세</a></article>';
     }).join("") : '<p class="muted">이 달에 날짜가 있는 팝업이 없습니다.</p>');
-    return '<section class="calpage" id="calpage" data-weeks="' + grid.weeks + '">' + head + leg + und + '<div class="calbody"><div class="calgrid" style="--weeks:' + grid.weeks + '" role="grid" aria-label="' + grid.y + "년 " + grid.m + '월 달력">' + dow + cells + '</div><aside class="caldetail card"><h3>' + esc(pretty(sel)) + '</h3><div class="caldl">' + detailBody + "</div></aside></div></section>";
+    var facts = calendarFacts(items, today, { go: count("진행중"), soon: count("예정"), done: count("종료") });
+    return '<section class="calpage" id="calpage" data-weeks="' + grid.weeks + '">' + head + leg + und + '<div class="calbody"><div class="calgrid" style="--weeks:' + grid.weeks + '" role="grid" aria-label="' + grid.y + "년 " + grid.m + '월 달력">' + dow + cells + '</div><aside class="caldetail card"><h3>' + esc(pretty(sel)) + '</h3><div class="caldl">' + detailBody + "</div></aside></div>" + facts + "</section>";
   }
   function fitNames(root) {
     if (!root) return;
@@ -399,8 +455,27 @@
       var cs = getComputedStyle(main);
       pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
     }
-    var h = window.innerHeight - ((head && head.offsetHeight) || 0) - pad;
-    page.style.height = Math.max(320, h) + "px";
+    page.style.height = "auto";
+    var headH = (head && head.offsetHeight) || 0;
+    document.documentElement.style.setProperty("--smgc-head", (headH + pad) + "px");
+    var grid = page.querySelector(".calgrid");
+    var detail = page.querySelector(".caldetail");
+    var facts = page.querySelector(".calfacts");
+    if (grid && detail) {
+      if (window.innerWidth >= 960) {
+        detail.style.maxHeight = grid.offsetHeight + "px";
+        detail.style.overflow = "auto";
+        if (facts) {
+          var top = grid.getBoundingClientRect().bottom + 8;
+          var room = window.innerHeight - top - 10;
+          facts.style.height = Math.max(150, room) + "px";
+        }
+      } else {
+        detail.style.maxHeight = "none";
+        detail.style.overflow = "visible";
+        if (facts) facts.style.height = "auto";
+      }
+    }
     fitNames(page);
   }
   function bindCalendar() {
@@ -417,7 +492,7 @@
     return prev;
   }
   function bindChecklist(S, item, today) {
-    var root = document.getElementById("prep");
+    var root = document.querySelector(".chkwrap") || document.getElementById("prep");
     if (!root) return;
     root.querySelectorAll("input[type=checkbox]").forEach(function (input) {
       input.addEventListener("change", function () {
@@ -430,7 +505,8 @@
         var prep = replacePrep(item, stageId, input.checked, today);
         input.disabled = true;
         S.setDoc(S.doc(S.db, "popups", item.p.id), { prep: prep, updatedAt: S.stamp() }, { merge: true }).then(function () {
-          root.outerHTML = renderChecklist(item.p, today, true);
+          var box = document.querySelector(".chkwrap") || root;
+          box.outerHTML = renderChecklist(item.p, today, true);
           bindChecklist(S, item, today);
         }).catch(function (e) {
           item.p.prep = snapshot;
