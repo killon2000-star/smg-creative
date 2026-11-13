@@ -1,4 +1,4 @@
-/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v9 */
+/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v10 */
 main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:none;margin-left:0;margin-right:0}
 .calpage{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0;min-height:calc(100dvh - var(--smgc-head, 140px));height:auto}
 .caltop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -64,7 +64,7 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .chkwrap{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0}
 .chkmain{display:flex;flex-direction:column;gap:8px;min-width:0}
 .prep{flex:0 0 auto;height:auto}
-.peers{margin:0;box-shadow:none}
+.peers,.duecard{margin:0;box-shadow:none;flex:0 0 auto;height:auto}
 .chkfacts{display:grid;grid-template-columns:1fr;gap:8px}
 .prep{box-shadow:none;display:flex;flex-direction:column;min-height:0;margin:0}
 .prephd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -86,11 +86,10 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .factdl span{font-weight:800}
 .factdl b{font-weight:700;overflow-wrap:anywhere}
 @media (min-width:960px){
-  .chkwrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);align-items:stretch}
-  .chkmain{height:100%}
-  .peers{flex:1 1 auto}
-  .chkfacts{height:100%;display:flex}
-  .chkfacts>.card{flex:1;margin:0}
+  .chkwrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);align-items:start}
+  .chkmain{height:auto}
+  .chkfacts{height:auto;display:flex;flex-direction:column;gap:8px}
+  .chkfacts>.card{flex:0 0 auto;height:auto;margin:0}
 }
 .updcmp{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;min-width:0;margin-bottom:12px}
 .updcharts{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -134,7 +133,7 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
   header nav .ncl:has(.ncl-i a:nth-child(3)){flex:1.6 1 36%}
   header nav .ncl a{flex:1 1 auto;width:auto;min-width:max-content;height:44px;min-height:40px;max-height:44px;padding:0 8px;justify-content:center;white-space:nowrap}
 }
-[data-theme=smg] .caldetail,[data-theme=smg] .prep,[data-theme=smg] .cmpchart,[data-theme=smg] .updcmp>.card,[data-theme=smg] .calitem,[data-theme=smg] .undated,[data-theme=smg] .calfacts>.card,[data-theme=smg] .chkfacts>.card,[data-theme=smg] .peers,[data-theme=smg] .dhead{border:2px solid #0a0a0a}
+[data-theme=smg] .caldetail,[data-theme=smg] .prep,[data-theme=smg] .cmpchart,[data-theme=smg] .updcmp>.card,[data-theme=smg] .calitem,[data-theme=smg] .undated,[data-theme=smg] .calfacts>.card,[data-theme=smg] .chkfacts>.card,[data-theme=smg] .peers,[data-theme=smg] .duecard,[data-theme=smg] .dhead{border:2px solid #0a0a0a}
 @media (min-width:641px) and (max-width:1023px){[data-tone=black] header nav .ncl{border-color:#f3f4f6}}
 [data-tone=black] .calnav a{background:#14171c!important;color:#fff!important;border-color:#fff!important}
 [data-tone=black] .calnav a.on{background:#fff!important;color:#0a0a0a!important}
@@ -152,7 +151,7 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 [data-tone=black] .st-done{background:#052e16;color:#bbf7d0;border-color:#bbf7d0}
 [data-tone=black] .st-none{background:#3f1212;color:#fecaca;border-color:#fecaca}
 [data-tone=black] .calmore{background:#fff;color:#0a0a0a}
-[data-tone=black][data-theme=smg] .caldetail,[data-tone=black][data-theme=smg] .prep,[data-tone=black][data-theme=smg] .cmpchart,[data-tone=black][data-theme=smg] .updcmp>.card,[data-tone=black][data-theme=smg] .calitem,[data-tone=black][data-theme=smg] .undated,[data-tone=black][data-theme=smg] .calfacts>.card,[data-tone=black][data-theme=smg] .chkfacts>.card,[data-tone=black][data-theme=smg] .dhead{border-color:#f3f4f6}
+[data-tone=black][data-theme=smg] .caldetail,[data-tone=black][data-theme=smg] .prep,[data-tone=black][data-theme=smg] .cmpchart,[data-tone=black][data-theme=smg] .updcmp>.card,[data-tone=black][data-theme=smg] .calitem,[data-tone=black][data-theme=smg] .undated,[data-tone=black][data-theme=smg] .calfacts>.card,[data-tone=black][data-theme=smg] .chkfacts>.card,[data-tone=black][data-theme=smg] .duecard,[data-tone=black][data-theme=smg] .dhead{border-color:#f3f4f6}
 [data-tone=black] .calkv span,[data-tone=black] .calkv a,[data-tone=black] .prepmeta,[data-tone=black] .prepname,[data-tone=black] .cmpname,[data-tone=black] .cmpval,[data-tone=black] .factnums span{color:#f5f5f5}
 [data-tone=black] .preprow{border-top-color:#e5e7eb;color:#f5f5f5}
 [data-tone=black] .preprow.isover{background:#2a1a05}

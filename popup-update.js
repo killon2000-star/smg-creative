@@ -1,4 +1,4 @@
-/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v9 */
+/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v10 */
 (function (global) {
   var STAGES = [
     { id: "contract", name: "계약", anchor: "start", offset: -14 },
@@ -362,9 +362,15 @@
     if (p.memo) lines.push(["메모", p.memo]);
     if (Number(p.target) > 0) lines.push(["목표 매출", fmt(p.target) + "원"]);
     if (p.statusOverride) lines.push(["상태 지정", p.statusOverride]);
+    var upcoming = rows.filter(function (r) { return !r.done && r.due && r.due >= today; });
+    var dueHtml = upcoming.length ? "<ul class=\"insl\">" + upcoming.map(function (r) {
+      var d = dayDiff(today, r.due);
+      var tag = d === 0 ? "오늘" : d > 0 ? "D-" + d : "";
+      return "<li>" + esc(r.name) + " " + esc(pretty(r.due)) + (tag ? " " + esc(tag) : "") + "</li>";
+    }).join("") + "</ul>" : "<p>다가오는 예정일이 없습니다.</p>";
     return '<aside class="chkfacts"><article class="card"><h3>이 팝업</h3><div class="factdl">' + lines.map(function (ln) {
       return "<span>" + esc(ln[0]) + "</span><b>" + esc(ln[1]) + "</b>";
-    }).join("") + "</div></article></aside>";
+    }).join("") + "</div></article><article class=\"card duecard\"><h3>다가오는 예정일</h3>" + dueHtml + "</article></aside>";
   }
   function popupOf(it) { return it && it.p ? it.p : it; }
   function rangesOverlap(a, b) {
