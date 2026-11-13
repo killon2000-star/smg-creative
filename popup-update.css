@@ -1,4 +1,4 @@
-/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v8 */
+/* 콜라보 팝업 일정·체크리스트·비교 요약. 로고색은 포인트만. v9 */
 main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:none;margin-left:0;margin-right:0}
 .calpage{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0;min-height:calc(100dvh - var(--smgc-head, 140px));height:auto}
 .caltop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -82,11 +82,15 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .preprow.isover{background:#fff4e5}
 .preprow.isover .prepmeta{color:#7c2d12}
 .preprow.isdone .prepname{text-decoration:line-through}
+.factdl{display:grid;grid-template-columns:5.6em minmax(0,1fr);gap:6px 8px;align-items:start}
+.factdl span{font-weight:800}
+.factdl b{font-weight:700;overflow-wrap:anywhere}
 @media (min-width:960px){
-  .chkwrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.72fr);align-items:stretch}
+  .chkwrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);align-items:stretch}
   .chkmain{height:100%}
   .peers{flex:1 1 auto}
-  .chkfacts{height:100%;grid-template-rows:repeat(3,minmax(0,1fr))}
+  .chkfacts{height:100%;display:flex}
+  .chkfacts>.card{flex:1;margin:0}
 }
 .updcmp{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;min-width:0;margin-bottom:12px}
 .updcharts{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -96,8 +100,8 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
 .updcmp .warnb{margin-top:6px}
 .updcmp .warnb:first-of-type{margin-top:0}
 .cmpbars{display:flex;flex-direction:column;gap:6px}
-.cmpbar{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(36px,1.5fr) auto;gap:6px;align-items:center;min-width:0}
-.cmpname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
+.cmpbar{display:grid;grid-template-columns:max-content minmax(24px,1fr) auto;gap:6px;align-items:center;min-width:0}
+.cmpname{white-space:nowrap;font-weight:800}
 .cmptrack{display:block;height:14px;background:#111;border-radius:7px;overflow:hidden;min-width:0}
 .cmptrack i{display:block;height:100%;background:#c42550}
 .cmpval{font-weight:800;white-space:nowrap;text-align:right}
@@ -112,17 +116,23 @@ main:has(#calpage),main:has(.chkwrap),main:has(.updcmp){width:100%;max-width:non
   .calfacts{overflow:hidden}
   .calfacts>.card{height:100%;min-height:0;overflow:auto}
 }
-@media (max-width:480px){
+@media (max-width:640px){
+  header nav .ncl-i{display:flex!important;flex-wrap:wrap;gap:4px}
+  header nav .ncl-i a{flex:1 1 calc(33.333% - 4px);width:auto;max-width:100%;min-height:44px;height:44px;max-height:44px}
+  header nav .ncl1 a{flex:1 1 100%;width:100%}
   .cmpbar{grid-template-columns:minmax(0,1fr) auto}
-  .cmptrack{grid-column:1 / -1;grid-row:2}
-  .cmpname{grid-column:1;grid-row:1}
+  .cmpname{grid-column:1;grid-row:1;white-space:normal}
   .cmpval{grid-column:2;grid-row:1}
+  .cmptrack{grid-column:1 / -1;grid-row:2}
 }
 @media (min-width:641px) and (max-width:1023px){
-  header nav{flex:1 0 100%;width:100%;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:stretch;overflow:visible}
-  header nav .ncl{min-width:0;border:2px solid #111;border-radius:8px;padding:4px;display:flex;flex-direction:column;height:auto}
-  header nav .ncl-i{display:flex;flex-direction:column;gap:4px;flex:1}
-  header nav .ncl a{width:100%;flex:1 1 auto;justify-content:center;min-height:36px;padding:0 4px}
+  header nav{flex:1 0 100%;width:100%;display:flex!important;flex-wrap:wrap;align-items:flex-start;gap:6px;overflow:visible}
+  header nav .ncl{flex:1 1 30%;min-width:0;border:2px solid #111;border-radius:8px;padding:4px;display:flex;flex-direction:row;align-items:center;gap:4px;height:auto}
+  header nav .ncl:last-child{flex:1 1 100%}
+  header nav .ncl-t{flex:none;white-space:nowrap;padding:0 4px}
+  header nav .ncl-i{display:flex;flex-wrap:wrap;gap:4px;flex:1;min-width:0}
+  header nav .ncl:has(.ncl-i a:nth-child(3)){flex:1.6 1 36%}
+  header nav .ncl a{flex:1 1 auto;width:auto;min-width:max-content;height:44px;min-height:40px;max-height:44px;padding:0 8px;justify-content:center;white-space:nowrap}
 }
 [data-theme=smg] .caldetail,[data-theme=smg] .prep,[data-theme=smg] .cmpchart,[data-theme=smg] .updcmp>.card,[data-theme=smg] .calitem,[data-theme=smg] .undated,[data-theme=smg] .calfacts>.card,[data-theme=smg] .chkfacts>.card,[data-theme=smg] .peers,[data-theme=smg] .dhead{border:2px solid #0a0a0a}
 @media (min-width:641px) and (max-width:1023px){[data-tone=black] header nav .ncl{border-color:#f3f4f6}}

@@ -1,4 +1,4 @@
-/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v8 */
+/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. v9 */
 (function (global) {
   var STAGES = [
     { id: "contract", name: "계약", anchor: "start", offset: -14 },
@@ -258,10 +258,12 @@
     });
     var ended = usable.filter(function (it) { return statusOf(it.p, today) === "종료" && it.days > 0 && finite(it.perDay); });
     var rec;
+    var recTops = [];
     if (!ended.length) rec = "종료되어 일평균 매출이 계산된 팝업이 없어 다음 팝업 기준을 추천하지 않습니다.";
     else {
       var max = Math.max.apply(null, ended.map(function (it) { return it.perDay; }));
       var tops = ended.filter(function (it) { return it.perDay === max; });
+      recTops = tops;
       rec = "종료된 팝업 가운데 일평균 매출이 가장 높은 것은 " + tops.map(function (it) { return it.p.name; }).join(", ") + "입니다. 일평균 " + money(max) + ".";
       if (tops.length === 1) {
         var oneTop = tops[0];
@@ -276,7 +278,7 @@
     if (!good.length) good.push("평균보다 높은 지표가 없습니다.");
     if (!bad.length) bad.push("숫자로 확인된 문제점이 없습니다.");
     if (!warn.length) warn.push("숫자로 확인된 경고가 없습니다.");
-    return { summary: summary, good: good, bad: bad, rec: rec, warn: warn, marginLine: line };
+    return { summary: summary, good: good, bad: bad, rec: rec, recTops: recTops, warn: warn, marginLine: line };
   }
   function barsHtml(items, key, title, unit) {
     var rows = items.map(function (it) {
@@ -294,13 +296,28 @@
   function listHtml(lines) {
     return "<ul class=\"insl\">" + lines.map(function (line) { return "<li>" + esc(line) + "</li>"; }).join("") + "</ul>";
   }
+  function recFacts(tops) {
+    if (!tops || !tops.length) return "";
+    return tops.map(function (it) {
+      var bits = [];
+      if (finite(it.days)) bits.push("운영 " + fmt(it.days) + "일");
+      if (finite(it.perDay)) bits.push("일평균 " + money(it.perDay));
+      if (finite(it.a)) bits.push("총매출 " + money(it.a));
+      if (finite(it.q)) bits.push("수량 " + fmt(it.q) + "개");
+      if (finite(it.st)) bits.push("소진율 " + one(it.st) + "%");
+      if (it.hasCost && finite(it.rate)) bits.push("마진율 " + one(it.rate) + "%");
+      if (it.hasCost && finite(it.profit)) bits.push("이익 " + money(it.profit));
+      if (Number(it.target) > 0 && finite(it.tgtPct)) bits.push("목표 달성 " + one(it.tgtPct) + "%");
+      return "<p><b>" + esc(it.p.name) + "</b></p><ul class=\"insl\">" + bits.map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("") + "</ul>";
+    }).join("");
+  }
   function renderCompare(items, today, marginLine) {
     var m = compareModel(items, today, marginLine);
     var cards = [
       ["sum", "요약", listHtml(m.summary)],
       ["good", "잘한 점", listHtml(m.good)],
       ["bad", "문제점", listHtml(m.bad)],
-      ["rec", "다음 팝업 추천", "<p>" + esc(m.rec) + "</p>"],
+      ["rec", "다음 팝업 추천", "<p>" + esc(m.rec) + "</p>" + recFacts(m.recTops)],
       ["warn", "경고", m.warn.length === 1 && m.warn[0].indexOf("없습니다") >= 0 ? "<p>" + esc(m.warn[0]) + "</p>" : m.warn.map(function (w) { return '<div class="warnb">' + esc(w) + "</div>"; }).join("")]
     ];
     return '<section class="updcmp" id="updcmp"><div class="updcharts">' + barsHtml(items, "perDay", "일평균 매출", "원") + barsHtml(items, "a", "총매출", "원") + "</div>" + cards.map(function (c) {
@@ -323,14 +340,31 @@
     return null;
   }
   function checklistFacts(p, today) {
+    var rows = checklistModel(p, today);
+    var done = rows.filter(function (r) { return r.done; }).length;
+    var pct = rows.length ? Math.round(done / rows.length * 100) : 0;
+    var overdue = rows.filter(function (r) { return r.overdue; }).length;
     var start = p.start && /^\d{4}-\d{2}-\d{2}$/.test(p.start) ? p.start : "";
     var end = p.end && /^\d{4}-\d{2}-\d{2}$/.test(p.end) && (!start || p.end >= start) ? p.end : "";
     var left = end ? dayDiff(today, end) : null;
     var next = nextTask(p, today);
-    var period = start && end ? pretty(start) + " ~ " + pretty(end) : start ? pretty(start) + " ~ 종료일 없음" : "시작일 없음";
-    var leftText = left == null ? "" : left > 0 ? left + "일" : left === 0 ? "오늘 종료" : "종료 후 " + (-left) + "일";
+    var period = start && end ? pretty(start) + " ~ " + pretty(end) : start ? pretty(start) + " ~ 종료일 없음" : "";
     var nextText = next ? next.name + (next.due ? " · " + pretty(next.due) : "") : "남은 단계 없음";
-    return '<aside class="chkfacts"><article class="card"><h3>기간</h3><p>' + esc(period) + '</p></article><article class="card"><h3>남은 일수</h3><p>' + (leftText ? esc(leftText) : "") + '</p></article><article class="card"><h3>다음 할 일</h3><p>' + esc(nextText) + "</p></article></aside>";
+    var lines = [];
+    if (period) lines.push(["기간", period]);
+    if (left != null) lines.push(["남은 일수", left > 0 ? left + "일" : left === 0 ? "오늘 종료" : "종료 후 " + (-left) + "일"]);
+    lines.push(["다음 할 일", nextText]);
+    lines.push(["지난 미완료", overdue + "건"]);
+    lines.push(["진행률", done + "/" + rows.length + " · " + pct + "%"]);
+    if (p.kind) lines.push(["구분", p.kind === "ip" ? "IP" : "콜라보"]);
+    if (p.ip) lines.push(["IP", p.ip]);
+    if (p.venue) lines.push(["장소", p.venue]);
+    if (p.memo) lines.push(["메모", p.memo]);
+    if (Number(p.target) > 0) lines.push(["목표 매출", fmt(p.target) + "원"]);
+    if (p.statusOverride) lines.push(["상태 지정", p.statusOverride]);
+    return '<aside class="chkfacts"><article class="card"><h3>이 팝업</h3><div class="factdl">' + lines.map(function (ln) {
+      return "<span>" + esc(ln[0]) + "</span><b>" + esc(ln[1]) + "</b>";
+    }).join("") + "</div></article></aside>";
   }
   function popupOf(it) { return it && it.p ? it.p : it; }
   function rangesOverlap(a, b) {
