@@ -1,4 +1,4 @@
-/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. 월간 일정(공식 발표·내부 예정)은 같은 달력에 합칩니다. v11 */
+/* SMG 크리에이티브 업데이트: 콜라보 팝업 일정, 준비 체크리스트, 끝난 팝업 비교 요약. 월간 일정(공식 발표·내부 예정)은 같은 달력에 합칩니다. v12 */
 (function (global) {
   var STAGES = [
     { id: "contract", name: "계약", anchor: "start", offset: -14 },
@@ -561,34 +561,14 @@
   function fitCalendar() {
     var page = document.getElementById("calpage");
     if (!page) return;
-    var head = document.querySelector("header");
-    var main = document.querySelector("main");
-    var pad = 0;
-    if (main) {
-      var cs = getComputedStyle(main);
-      pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-    }
     page.style.height = "auto";
-    var headH = (head && head.offsetHeight) || 0;
-    document.documentElement.style.setProperty("--smgc-head", (headH + pad) + "px");
-    var grid = page.querySelector(".calgrid");
     var detail = page.querySelector(".caldetail");
     var facts = page.querySelector(".calfacts");
-    if (grid && detail) {
-      if (window.innerWidth >= 960) {
-        detail.style.maxHeight = grid.offsetHeight + "px";
-        detail.style.overflow = "auto";
-        if (facts) {
-          var top = grid.getBoundingClientRect().bottom + 8;
-          var room = window.innerHeight - top - 10;
-          facts.style.height = Math.max(150, room) + "px";
-        }
-      } else {
-        detail.style.maxHeight = "none";
-        detail.style.overflow = "visible";
-        if (facts) facts.style.height = "auto";
-      }
+    if (detail) {
+      detail.style.maxHeight = "none";
+      detail.style.overflow = "visible";
     }
+    if (facts) facts.style.height = "auto";
     fitNames(page);
   }
   function bindCalendar() {

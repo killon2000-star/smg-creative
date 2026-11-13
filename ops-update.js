@@ -96,14 +96,20 @@
     if (!rows || !rows.length) return '<p class="muted">자료 없음</p>';
     var max = Math.max.apply(null, rows.map(function (r) { return Number(r[key]) || 0; }));
     if (!(max > 0)) return '<p class="muted">자료 없음</p>';
-    var w = 640, rh = 28, h = rh * rows.length + 8;
+    var labels = rows.map(function (r) { return fmt(Number(r[key]) || 0) + unit; });
+    var valueW = Math.max.apply(null, labels.map(function (t) { return Math.ceil(t.length * 8.2) + 10; }));
+    var labelW = 52;
+    var barMax = 220;
+    var w = labelW + barMax + 8 + valueW;
+    var rh = 28;
+    var h = rh * rows.length + 4;
     var body = rows.map(function (r, i) {
       var v = Number(r[key]) || 0;
-      var bw = Math.max(0, Math.round((v / max) * (w - 180)));
-      var y = 8 + i * rh;
-      return '<text x="0" y="' + (y + 16) + '">' + esc(r.label) + '</text><rect x="120" y="' + y + '" width="' + bw + '" height="18"></rect><text x="' + (128 + bw) + '" y="' + (y + 14) + '">' + esc(fmt(v) + unit) + "</text>";
+      var bw = Math.max(4, Math.round((v / max) * barMax));
+      var y = 4 + i * rh;
+      return '<text class="ops-ax" x="0" y="' + (y + 16) + '">' + esc(r.label) + '</text><rect x="' + labelW + '" y="' + y + '" width="' + bw + '" height="16"></rect><text class="ops-val" x="' + (labelW + bw + 8) + '" y="' + (y + 14) + '">' + esc(labels[i]) + "</text>";
     }).join("");
-    return '<svg class="ops-chart" viewBox="0 0 ' + w + " " + h + '" role="img">' + body + "</svg>";
+    return '<svg class="ops-chart" viewBox="0 0 ' + w + " " + h + '" style="aspect-ratio:' + w + " / " + h + '" role="img">' + body + "</svg>";
   }
   function closeHtml(m, ym) {
     function cell(v, unit) { return v == null ? '<span class="muted">자료 없음</span>' : esc(fmt(v) + (unit || "")); }
@@ -122,7 +128,8 @@
     return '<div class="glist">' + rows.map(function (r) { return lineCard(r.name, r.days + "일", "<span>" + fmt(r.amount) + "원</span><span>" + fmt(r.qty) + "개</span>", false); }).join("") + "</div>";
   }
   function block(title, text, chart) {
-    return '<section class="block"><h3>' + title + '</h3><div class="ops-split"><div>' + text + "</div><div>" + (chart || "") + "</div></div></section>";
+    var body = chart ? '<div class="ops-split"><div>' + text + '</div><div class="ops-chartwrap">' + chart + "</div></div>" : text;
+    return '<section class="block"><h3>' + title + "</h3>" + body + "</section>";
   }
   function shiftYm(ym, delta) {
     var p = ym.split("-").map(Number);

@@ -1,4 +1,4 @@
-/* 입고 확인·실사·이동·마감. 폰·탭·PC 같은 버튼. v1 */
+/* 입고 확인·실사·이동·마감. 폰·탭·PC 같은 버튼. v2 */
 main:has(.ops){width:100%;max-width:none}
 .ops{width:100%;min-width:0;display:flex;flex-direction:column;gap:10px}
 .ops h2,.ops h3{margin:0}
@@ -21,11 +21,16 @@ main:has(.ops){width:100%;max-width:none}
 .ops-qty{width:6em;min-height:var(--tap,44px);text-align:right}
 .ops-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;bottom:0;background:var(--c-bg,#f5f5f5);padding:8px 0;border-top:2px solid #111}
 .ops-bar p{flex:1 1 220px;margin:0}
-.ops-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
-.ops-chart{width:100%;height:auto;background:#fff;border:2px solid #111;border-radius:10px}
+.ops-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;align-items:start}
+.ops-chartwrap{min-width:0}
+.ops-chart{width:100%;height:auto;display:block;background:#fff;border:2px solid #111;border-radius:10px;overflow:visible}
 .ops-chart text{font-size:12px;fill:#111;font-family:var(--font)}
 .ops-chart rect{fill:#111}
-.mrep .block{border:2px solid #111;border-radius:10px;background:#fff;padding:12px;break-inside:avoid;page-break-inside:avoid}
+.mrep .block{border:2px solid #111;border-radius:10px;background:#fff;padding:8px 12px 10px;break-inside:avoid;page-break-inside:avoid}
+.mrep .block h3{margin:0 0 4px}
+.mrep .block p{margin:2px 0}
+.mrep .glist{gap:6px}
+.mrep .grow{padding:8px 10px}
 .ops-paste{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .lb{font-weight:700}
 @media (width<=800px){
