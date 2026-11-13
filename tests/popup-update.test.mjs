@@ -100,4 +100,22 @@ assert.ok(check.includes("2/5"));
 assert.ok(check.includes("40%"));
 assert.ok(check.includes("예정일 지남"));
 assert.ok(check.includes("철수"));
+
+vm.runInContext(fs.readFileSync(new URL("../ops-core.js", import.meta.url), "utf8"), context);
+const withEvents = U.renderCalendar({
+  items: [{ p: open }, { p: none }],
+  locs: [],
+  today,
+  params: new URLSearchParams("m=2026-11&d=2026-11-13"),
+  events: [
+    { source: "x", title: "진격거인 팝업", venue: "홍대 리밋션", venueKey: "홍대 리밋션", type: "popup", start: "2026-11-12", end: "2026-11-20" },
+    { source: "plan", title: "진격거인 팝업 사전 예약", venue: "홍대 리밋션", venueKey: "홍대 리밋션", type: "popup", start: "2026-11-12", end: "2026-11-18" },
+    { source: "plan", title: "날짜 없는 행사", undated: true, venue: "수원", venueKey: "수원" }
+  ]
+});
+assert.ok(withEvents.includes("공식 발표"));
+assert.ok(withEvents.includes("내부 예정"));
+assert.ok(withEvents.includes("날짜 미정"));
+assert.ok(withEvents.includes("세부"));
+assert.ok(withEvents.includes("진격거인 팝업"));
 console.log("popup-update tests ok");

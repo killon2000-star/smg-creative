@@ -1,6 +1,6 @@
 // SMG 크리에이티브 서비스워커: 앱 화면(HTML·JS·CSS·아이콘)만 저장해 빠르게 시작.
 // Firestore·로그인(Google/Firebase) 등 다른 주소 요청은 절대 저장·가로채지 않음.
-const V = 'smgc-v6', SHELL = V + '-shell', ASSETS = V + '-assets';
+const V = 'smgc-v7', SHELL = V + '-shell', ASSETS = V + '-assets';
 const scope = new URL(self.registration.scope);
 self.addEventListener('install', e => { e.waitUntil(caches.open(SHELL).then(c => c.addAll([scope.pathname, scope.pathname + 'manifest.webmanifest']).catch(() => {}))); });
 self.addEventListener('activate', e => { e.waitUntil((async () => { for (const k of await caches.keys()) if (!k.startsWith(V)) await caches.delete(k); await self.clients.claim(); })()); });
